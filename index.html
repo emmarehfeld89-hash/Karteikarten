@@ -1,0 +1,160 @@
+<!doctype html>
+<html lang="de">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="theme-color" content="#f6f7f4">
+    <title>Karteikarten</title>
+    <link rel="stylesheet" href="styles.css">
+  </head>
+  <body>
+    <div class="app-shell">
+      <aside class="sidebar">
+        <a class="brand" href="#" aria-label="Karteikarten Startseite">
+          <span class="brand-mark">K</span>
+          <span>Karteikarten<span class="brand-dot">.</span></span>
+        </a>
+
+        <div class="sidebar-label">DEIN LERNBEREICH</div>
+        <nav class="folder-nav" id="folder-nav" aria-label="Ordner"></nav>
+        <button class="sidebar-add" id="open-folder-form" type="button"><span>＋</span> Ordner erstellen</button>
+
+        <div class="sidebar-bottom">
+          <div class="storage-note"><span class="status-dot"></span><span>Deine Karten sind sicher<br>auf diesem Gerät gespeichert.</span></div>
+          <button class="text-button" id="export-data" type="button">Daten exportieren ↗</button>
+          <label class="text-button import-label" for="import-file">Daten importieren ↗</label>
+          <input id="import-file" type="file" accept="application/json,.json" hidden>
+        </div>
+      </aside>
+
+      <main class="main-content">
+        <header class="topbar">
+          <div class="breadcrumb"><span>Mein Lernbereich</span><span class="breadcrumb-separator">/</span><strong id="current-folder-name">Alle Karten</strong></div>
+        </header>
+
+        <section class="page-content">
+          <div class="welcome-row">
+            <div>
+              <p class="eyebrow" id="date-label"></p>
+              <h1 id="page-title">Lernen, das bleibt.</h1>
+              <p class="subheading" id="page-subtitle">Ein kleiner Schritt heute. Ein großer Unterschied morgen.</p>
+            </div>
+            <div class="header-actions">
+              <button class="button button-secondary" id="learn-all" type="button"><span>↗</span> Alles lernen</button>
+              <button class="button button-primary" id="add-card" type="button"><span>＋</span> Karte erstellen</button>
+            </div>
+          </div>
+
+          <section class="stats-grid" aria-label="Lernübersicht">
+            <article class="stat-card">
+              <div class="stat-icon due-icon">↻</div>
+              <div class="stat-caption">Heute fällig</div>
+              <div class="stat-value" id="due-count">0</div>
+              <div class="stat-foot" id="due-foot">Bereit, wenn du es bist</div>
+            </article>
+            <article class="stat-card">
+              <div class="stat-icon card-icon">▤</div>
+              <div class="stat-caption">Karten insgesamt</div>
+              <div class="stat-value" id="total-count">0</div>
+              <div class="stat-foot">in deinem Lernbereich</div>
+            </article>
+            <article class="stat-card">
+              <div class="stat-icon folder-icon">▱</div>
+              <div class="stat-caption">Ordner</div>
+              <div class="stat-value" id="folder-count">0</div>
+              <div class="stat-foot">Wissen, gut sortiert</div>
+            </article>
+          </section>
+
+          <section class="content-panel">
+            <div class="panel-heading">
+              <div>
+                <h2 id="list-title">Deine Ordner</h2>
+                <p id="list-description">Wähle einen Ordner zum Lernen oder Stöbern.</p>
+              </div>
+              <button class="button button-small button-secondary" id="learn-current" type="button">Ordner lernen <span>→</span></button>
+            </div>
+            <div id="folder-cards" class="folder-grid"></div>
+            <div id="cards-area" class="cards-area" hidden></div>
+            <div id="empty-state" class="empty-state" hidden>
+              <div class="empty-illustration">✳</div>
+              <h3 id="empty-title">Hier fängt dein Wissen an.</h3>
+              <p id="empty-description">Lege deinen ersten Ordner an und bring deine Gedanken in Ordnung.</p>
+              <button class="button button-primary" id="empty-action" type="button">＋ Ordner erstellen</button>
+            </div>
+          </section>
+          <footer class="page-footer"><span>Gut gelernt ist halb gewusst.</span><span id="sync-label">● Lokal gespeichert</span></footer>
+        </section>
+      </main>
+    </div>
+
+    <dialog id="folder-dialog" class="modal">
+      <form id="folder-form">
+        <div class="modal-heading"><div><p class="eyebrow">ORGANISATION</p><h2>Neuer Ordner</h2></div><button class="icon-button" type="button" data-close="folder-dialog" aria-label="Schließen">×</button></div>
+        <label class="field-label" for="folder-name">Name</label>
+        <input class="text-input" id="folder-name" name="name" placeholder="z. B. Biologie" maxlength="60" required>
+        <label class="field-label" for="folder-parent">Übergeordneter Ordner <span class="optional">(optional)</span></label>
+        <select class="text-input" id="folder-parent" name="parentId"></select>
+        <p class="field-hint">Ordner lassen sich beliebig tief verschachteln.</p>
+        <div class="modal-actions"><button class="button button-secondary" type="button" data-close="folder-dialog">Abbrechen</button><button class="button button-primary" type="submit">Ordner anlegen</button></div>
+      </form>
+    </dialog>
+
+    <dialog id="card-dialog" class="modal card-modal">
+      <form id="card-form">
+        <div class="modal-heading"><div><p class="eyebrow">NEUES WISSEN</p><h2>Karte erstellen</h2></div><button class="icon-button" type="button" data-close="card-dialog" aria-label="Schließen">×</button></div>
+        <label class="field-label" for="card-folder">Ordner</label>
+        <select class="text-input" id="card-folder" name="folderId" required></select>
+        <label class="field-label" for="card-front">Vorderseite <span class="optional">Frage oder Begriff</span></label>
+        <div class="editor-wrap">
+          <div class="editor-toolbar" role="toolbar" aria-label="Textformatierung">
+            <button type="button" data-command="bold" aria-label="Fett"><b>B</b></button>
+            <button type="button" data-command="italic" aria-label="Kursiv"><i>I</i></button>
+            <button type="button" data-command="underline" aria-label="Unterstrichen"><u>U</u></button>
+            <span class="toolbar-divider"></span>
+            <button type="button" data-command="insertUnorderedList" aria-label="Aufzählung">• Liste</button>
+            <button type="button" data-command="insertOrderedList" aria-label="Nummerierte Liste">1. Liste</button>
+            <button type="button" data-command="formatBlock" data-value="h3" aria-label="Gliederungspunkt">Überschrift</button>
+          </div>
+          <div id="card-front" class="rich-editor" contenteditable="true" role="textbox" aria-multiline="true" aria-label="Vorderseite" data-placeholder="Was möchtest du wissen?"></div>
+        </div>
+        <label class="field-label" for="card-back">Rückseite <span class="optional">Antwort oder Erklärung</span></label>
+        <div class="editor-wrap">
+          <div class="editor-toolbar" role="toolbar" aria-label="Textformatierung">
+            <button type="button" data-command="bold" aria-label="Fett"><b>B</b></button>
+            <button type="button" data-command="italic" aria-label="Kursiv"><i>I</i></button>
+            <button type="button" data-command="underline" aria-label="Unterstrichen"><u>U</u></button>
+            <span class="toolbar-divider"></span>
+            <button type="button" data-command="insertUnorderedList" aria-label="Aufzählung">• Liste</button>
+            <button type="button" data-command="insertOrderedList" aria-label="Nummerierte Liste">1. Liste</button>
+            <button type="button" data-command="formatBlock" data-value="h3" aria-label="Gliederungspunkt">Überschrift</button>
+          </div>
+          <div id="card-back" class="rich-editor" contenteditable="true" role="textbox" aria-multiline="true" aria-label="Rückseite" data-placeholder="Was ist die Antwort?"></div>
+        </div>
+        <div class="modal-actions"><button class="button button-secondary" type="button" data-close="card-dialog">Abbrechen</button><button class="button button-primary" type="submit">Karte speichern</button></div>
+      </form>
+    </dialog>
+
+    <dialog id="study-dialog" class="modal study-modal">
+      <div class="study-top"><span id="study-progress">KARTE 1 VON 1</span><button class="icon-button" type="button" data-close="study-dialog" aria-label="Lernen beenden">×</button></div>
+      <div class="study-folder" id="study-folder"></div>
+      <div class="study-card">
+        <span class="study-side" id="study-side">VORDERSEITE</span>
+        <div class="study-content" id="study-content"></div>
+        <div class="study-hint" id="study-hint">Denk kurz nach, bevor du umdrehst.</div>
+      </div>
+      <button class="button button-primary flip-button" id="flip-card" type="button">Antwort anzeigen <span>↻</span></button>
+      <div class="rating-area" id="rating-area" hidden>
+        <p>Wie leicht ist dir die Antwort gefallen?</p>
+        <div class="rating-buttons">
+          <button class="rating-button rating-bad" data-rating="poor" type="button"><strong>Schlecht</strong><span>10 Minuten</span></button>
+          <button class="rating-button rating-hard" data-rating="hard" type="button"><strong>Schwierig</strong><span>1 Tag</span></button>
+          <button class="rating-button rating-normal" data-rating="normal" type="button"><strong>Normal</strong><span>3 Tage</span></button>
+          <button class="rating-button rating-easy" data-rating="easy" type="button"><strong>Leicht</strong><span>7 Tage</span></button>
+        </div>
+      </div>
+    </dialog>
+    <div id="toast" class="toast" role="status" aria-live="polite"></div>
+    <script src="app.js"></script>
+  </body>
+</html>
